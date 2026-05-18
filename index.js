@@ -1,10 +1,10 @@
 const express = require("express");
 const app = express();
+require("dotenv").config();
 const port = process.env.PORT;
 const cors = require("cors");
 const { MongoClient, ServerApiVersion } = require("mongodb");
 const uri = process.env.MONGO_DB_URI;
-require("dotenv").config();
 app.use(cors());
 app.use(express.json());
 
@@ -45,3 +45,11 @@ async function run() {
   }
 }
 run().catch(console.dir);
+
+app.get("/", (req, res) => {
+  res.send("Server is cooking!");
+});
+
+app.listen(port, () => {
+  console.log(`Server is cooking on  http://localhost:${port}`);
+});
