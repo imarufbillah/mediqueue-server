@@ -69,7 +69,7 @@ async function run() {
 
     // API endpoint to get all and limit tutors
     app.get("/tutors", async (req, res) => {
-      const limit = parseInt(req.query.limit) || 6;
+      const limit = parseInt(req.query.limit);
 
       let query = tutorsCollection.find();
 
