@@ -66,6 +66,12 @@ async function run() {
       });
     });
 
+    // API endpoint to get all tutors
+    app.get("/tutors", async (req, res) => {
+      const tutors = await tutorsCollection.find().toArray();
+      res.json(tutors);
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
