@@ -157,6 +157,15 @@ async function run() {
       });
     });
 
+    // API endpoint to get all bookings booked by authenticated user
+    app.get("/my-bookings", validateToken, async (req, res) => {
+      const userId = req.user.sub;
+      const bookings = await bookingsCollection
+        .find({ studentId: userId })
+        .toArray();
+      res.json(bookings);
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
