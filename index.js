@@ -4,6 +4,7 @@ require("dotenv").config();
 const port = process.env.PORT;
 const cors = require("cors");
 const { MongoClient, ServerApiVersion } = require("mongodb");
+const { createRemoteJWKSet, jwtVerify } = require("jose-cjs");
 const uri = process.env.MONGO_DB_URI;
 app.use(cors());
 app.use(express.json());
@@ -17,6 +18,36 @@ const client = new MongoClient(uri, {
   },
 });
 
+const validateToken = async (req, res, next) => {
+  try {
+    // Fetch the JSON Web Key Set (JWKS)
+    const JWKS = createRemoteJWKSet(
+      new URL(`${process.env.CLIENT_BASE_URL}/api/auth/jwks`),
+    );
+
+    // Get the authorization header and validate it
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Authorization header missing" });
+    }
+
+    // Extract the token from the authorization header and validate it
+    const token = authHeader.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({ success: false, message: "Token missing" });
+    }
+
+    // Verify the token using the JWKS
+    const { payload } = await jwtVerify(token, JWKS);
+    next();
+  } catch (error) {
+    console.error("Token validation failed:", error);
+    throw error;
+  }
+};
+
 async function run() {
   try {
     await client.connect();
@@ -25,7 +56,7 @@ async function run() {
     const tutorsCollection = database.collection("tutors");
 
     // API endpoint to add a new tutor
-    app.post("/tutors", async (req, res) => {
+    app.post("/tutors", validateToken, async (req, res) => {
       const tutor = req.body;
       const result = await tutorsCollection.insertOne(tutor);
       res.json({
