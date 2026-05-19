@@ -82,7 +82,7 @@ async function run() {
     });
 
     // API endpoint to get a specific tutor
-    app.get("/tutors/:id", async (req, res) => {
+    app.get("/tutors/:id", validateToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const tutor = await tutorsCollection.findOne(query);
@@ -123,6 +123,7 @@ async function run() {
       });
     });
 
+    // API endpoint to delete a specific tutor which is added by authenticated user
     app.delete("/my-tutors/:id", validateToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
