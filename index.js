@@ -89,12 +89,26 @@ async function run() {
       res.json(tutor);
     });
 
+    // API endpoint to get those tutors added by authenticated user
     app.get("/my-tutors", validateToken, async (req, res) => {
       const userId = req.user.sub;
       const myTutors = await tutorsCollection
         .find({ userId: userId })
         .toArray();
       res.json(myTutors);
+    });
+
+    app.patch("/my-tutors/:id", validateToken, async (req, res) => {
+      const id = req.params.id;
+      const updatedTutor = req.body;
+      const query = { _id: new ObjectId(id) };
+      const result = await tutorsCollection.updateOne(query, {
+        $set: updatedTutor,
+      });
+      res.json({
+        success: true,
+        message: "Tutor updated successfully",
+      });
     });
 
     // Send a ping to confirm a successful connection
