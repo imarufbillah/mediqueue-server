@@ -102,6 +102,17 @@ async function run() {
       const id = req.params.id;
       const updatedTutor = req.body;
       const query = { _id: new ObjectId(id) };
+
+      const userId = req.user.sub;
+      const tutor = await tutorsCollection.findOne(query);
+
+      if (userId !== tutor.userId) {
+        return res.status(403).json({
+          success: false,
+          message: "You are not authorized to update this tutor",
+        });
+      }
+
       const result = await tutorsCollection.updateOne(query, {
         $set: updatedTutor,
       });
