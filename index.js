@@ -41,6 +41,7 @@ const validateToken = async (req, res, next) => {
 
     // Verify the token using the JWKS
     const { payload } = await jwtVerify(token, JWKS);
+    req.user = payload;
     next();
   } catch (error) {
     console.error("Token validation failed:", error);
@@ -86,6 +87,14 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const tutor = await tutorsCollection.findOne(query);
       res.json(tutor);
+    });
+
+    app.get("/my-tutors", validateToken, async (req, res) => {
+      const userId = req.user.sub;
+      const myTutors = await tutorsCollection
+        .find({ userId: userId })
+        .toArray();
+      res.json(myTutors);
     });
 
     // Send a ping to confirm a successful connection
