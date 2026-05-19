@@ -3,7 +3,7 @@ const app = express();
 require("dotenv").config();
 const port = process.env.PORT;
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const { createRemoteJWKSet, jwtVerify } = require("jose-cjs");
 const uri = process.env.MONGO_DB_URI;
 app.use(cors());
@@ -70,6 +70,13 @@ async function run() {
     app.get("/tutors", async (req, res) => {
       const tutors = await tutorsCollection.find().toArray();
       res.json(tutors);
+    });
+
+    app.get("/tutors/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const tutor = await tutorsCollection.findOne(query);
+      res.json(tutor);
     });
 
     // Send a ping to confirm a successful connection
