@@ -55,6 +55,7 @@ async function run() {
 
     const database = client.db("mediqueue");
     const tutorsCollection = database.collection("tutors");
+    const bookingsCollection = database.collection("bookings");
 
     // API endpoint to add a new tutor
     app.post("/tutors", validateToken, async (req, res) => {
@@ -142,6 +143,17 @@ async function run() {
       res.json({
         success: true,
         message: "Tutor deleted successfully",
+      });
+    });
+
+    // API endpoint to add a new booking
+    app.post("/bookings", validateToken, async (req, res) => {
+      const booking = req.body;
+      const result = await bookingsCollection.insertOne(booking);
+      res.json({
+        success: true,
+        message: "Booking added successfully",
+        bookingId: result.insertedId,
       });
     });
 
