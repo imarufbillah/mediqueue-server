@@ -66,12 +66,21 @@ async function run() {
       });
     });
 
-    // API endpoint to get all tutors
+    // API endpoint to get all and limit tutors
     app.get("/tutors", async (req, res) => {
-      const tutors = await tutorsCollection.find().toArray();
+      const limit = parseInt(req.query.limit) || 6;
+
+      let query = tutorsCollection.find();
+
+      if (limit) {
+        query = query.limit(limit);
+      }
+
+      const tutors = await query.toArray();
       res.json(tutors);
     });
 
+    // API endpoint to get a specific tutor
     app.get("/tutors/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
