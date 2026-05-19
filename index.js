@@ -166,6 +166,43 @@ async function run() {
       res.json(bookings);
     });
 
+    // API endpoint to cancel a specific booking
+    app.patch("/my-bookings/:id", validateToken, async (req, res) => {
+      try {
+        const id = req.params.id;
+
+        const query = {
+          _id: new ObjectId(id),
+        };
+
+        const updatedDoc = {
+          $set: {
+            status: "cancelled",
+            cancelledAt: new Date(),
+          },
+        };
+
+        const result = await bookingsCollection.updateOne(query, updatedDoc);
+
+        if (result.matchedCount === 0) {
+          return res.status(404).json({
+            success: false,
+            message: "Booking not found",
+          });
+        }
+
+        res.status(200).json({
+          success: true,
+          message: "Booking cancelled successfully!",
+        });
+      } catch (error) {
+        res.status(500).json({
+          success: false,
+          message: error.message,
+        });
+      }
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
