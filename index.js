@@ -60,7 +60,16 @@ async function run() {
     // API endpoint to add a new tutor
     app.post("/tutors", validateToken, async (req, res) => {
       const tutor = req.body;
-      const result = await tutorsCollection.insertOne(tutor);
+      // Convert availableDays, totalSlots, experience, and hourlyFee to numbers
+      const newTutor = {
+        ...tutor,
+        availableDays: Number(tutor.availableDays),
+        totalSlots: Number(tutor.totalSlots),
+        experience: Number(tutor.experience),
+        hourlyFee: Number(tutor.hourlyFee),
+        slotsRemaining: Number(tutor.totalSlots),
+      };
+      const result = await tutorsCollection.insertOne(newTutor);
       res.json({
         success: true,
         message: "Tutor added successfully",
