@@ -150,6 +150,15 @@ async function run() {
     app.post("/bookings", validateToken, async (req, res) => {
       const booking = req.body;
       const result = await bookingsCollection.insertOne(booking);
+
+      // Decrement the slotsRemaining field of the tutor
+      if (result.acknowledged) {
+        await tutorsCollection.updateOne(
+          { _id: new ObjectId(booking.tutor.tutorId) },
+          { $inc: { slotsRemaining: -1 } },
+        );
+      }
+
       res.json({
         success: true,
         message: "Booking added successfully",
