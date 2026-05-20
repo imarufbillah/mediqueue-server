@@ -63,6 +63,7 @@ async function run() {
       // Convert availableDays, totalSlots, experience, and hourlyFee to numbers
       const newTutor = {
         ...tutor,
+        startDate: new Date(tutor.startDate),
         availableDays: Number(tutor.availableDays),
         totalSlots: Number(tutor.totalSlots),
         experience: Number(tutor.experience),
@@ -144,7 +145,11 @@ async function run() {
     // API endpoint to update a specific tutor which is added by authenticated user
     app.patch("/my-tutors/:id", validateToken, async (req, res) => {
       const id = req.params.id;
-      const updatedTutor = req.body;
+      const body = req.body;
+      const updatedTutor = {
+        ...body,
+        startDate: new Date(body.startDate),
+      };
       const query = { _id: new ObjectId(id) };
 
       const userId = req.user.sub;
@@ -190,7 +195,11 @@ async function run() {
 
     // API endpoint to add a new booking
     app.post("/bookings", validateToken, async (req, res) => {
-      const booking = req.body;
+      const body = req.body;
+      const booking = {
+        ...body,
+        bookedOn: new Date(body.bookedOn),
+      };
       const result = await bookingsCollection.insertOne(booking);
 
       // Decrement the slotsRemaining field of the tutor
