@@ -186,6 +186,8 @@ async function run() {
 
     // API endpoint to cancel a specific booking
     app.patch("/my-bookings/:id", validateToken, async (req, res) => {
+      const { tutorId } = req.body;
+
       try {
         const id = req.params.id;
 
@@ -201,6 +203,14 @@ async function run() {
         };
 
         const result = await bookingsCollection.updateOne(query, updatedDoc);
+
+        // Increment the slotsRemaining field of the tutor
+        if (result.modifiedCount > 0) {
+          await tutorsCollection.updateOne(
+            { _id: new ObjectId(tutorId) },
+            { $inc: { slotsRemaining: 1 } },
+          );
+        }
 
         if (result.matchedCount === 0) {
           return res.status(404).json({
