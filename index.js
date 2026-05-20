@@ -77,18 +77,51 @@ async function run() {
       });
     });
 
-    // API endpoint to get all and limit tutors
+    // API endpoint to get all tutors based on search, date range, and limit parameters
     app.get("/tutors", async (req, res) => {
-      const limit = parseInt(req.query.limit);
+      try {
+        const { search, startDate, endDate, limit } = req.query;
 
-      let query = tutorsCollection.find();
+        const query = {};
 
-      if (limit) {
-        query = query.limit(limit);
+        // Search by tutor name
+        if (search) {
+          query.name = {
+            $regex: search,
+            $options: "i",
+          };
+        }
+
+        // Filter by date range
+        if (startDate || endDate) {
+          query.startDate = {};
+
+          if (startDate) {
+            query.startDate.$gte = new Date(startDate);
+          }
+
+          if (endDate) {
+            query.startDate.$lte = new Date(endDate);
+          }
+        }
+
+        // MongoDB query
+        let cursor = tutorsCollection.find(query);
+
+        // Limit results
+        if (limit) {
+          cursor = cursor.limit(parseInt(limit));
+        }
+
+        const tutors = await cursor.toArray();
+
+        res.json(tutors);
+      } catch (error) {
+        res.status(500).json({
+          success: false,
+          message: error.message,
+        });
       }
-
-      const tutors = await query.toArray();
-      res.json(tutors);
     });
 
     // API endpoint to get a specific tutor
